@@ -5,10 +5,14 @@ seaborn
 tensorflow-macos; sys_platform == 'darwin'
 tensorflow; sys_platform != 'darwin'
 tensorflow_hub
-transformers
+fairscale
+ftfy
+transformers==4.21.3
 diffusers
+accelerate
 timm
 clip-interrogator==0.3.1
 torch; sys_platform == 'darwin'
 --extra-index-url https://download.pytorch.org/whl/cu113
 torch==1.12.1+cu113; sys_platform != 'darwin'
+torchvision==0.13.1+cu113; sys_platform != 'darwin'

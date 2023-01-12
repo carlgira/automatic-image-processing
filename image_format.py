@@ -8,7 +8,7 @@ import seaborn as sns
 from copy import deepcopy
 from clustering import filter_clusters
 import motionnet
-from diffusers import DiffusionPipeline, StableDiffusionInpaintPipeline
+from diffusers import StableDiffusionInpaintPipeline
 from PIL import Image
 import os
 from clip_interrogator import Config, Interrogator
@@ -185,7 +185,7 @@ def possible_parts(image, detection):
     return result_filter
 
 
-def process_image(filename):
+def process_image(filename, output_filename=None):
     image = cv2.imread(filename)[:,:,::-1]
     org_image = image.copy()
 
@@ -227,8 +227,13 @@ def process_image(filename):
     mask_image.fill(255)
     mask_image[yoff:yoff+height, xoff:xoff+width, :] = 0
 
+    pil_image = Image.fromarray(np.uint8(org_image)).convert('RGB')
     ci = Interrogator(Config(clip_model_name="ViT-L-14/openai"))
-    prompt = ci.interrogate(org_image)
+    ci.config.blip_num_beams = 64
+    ci.config.chunk_size = 2048
+    ci.config.flavor_intermediate_count = 2048
+
+    prompt = ci.interrogate(pil_image)
 
     # python load auth_token from environment variable
     # os.environ
@@ -246,8 +251,10 @@ def process_image(filename):
     output = pipe(prompt=prompt, image=Image.fromarray(final_image), mask_image=Image.fromarray(mask_image)).images[0]
     result = np.array(output)
     result[yoff:yoff+height, xoff:xoff+width, :] = resized
-    result = Image.fromarray(result)
-    result.save("./output.png")
+
+    if output_filename is not None:
+        result = Image.fromarray(result)
+        result.save(output_filename)
 
     return result
 
