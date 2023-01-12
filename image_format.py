@@ -190,15 +190,24 @@ def process_image(filename):
     org_image = image.copy()
 
     _, detection = predict_animal_mask(image, 85)
-    result = possible_parts(image, detection[0])
-    colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+
+    detection_max = None
+    area_max = 0
+    for part in detection:
+        mask, keypoints, rect = part
+        x_min, y_min, x_max, y_max = rect
+        area = (x_max - x_min) * (y_max - y_min)
+        if area > area_max:
+            area_max = area
+            detection_max = part
+
+    result = possible_parts(image, detection_max)
 
     #cv2.rectangle(image, (part[1][0], part[1][1]), (part[1][2], part[1][3]), colors[i], 2)
     part = result[2]
     x1, y1, x2, y2 = part[1]
     w = abs(x2 - x1)
     h = abs(y2 - y1)
-    print(part[1])
     sub = org_image[y2:y1, x1:x2]
     scale_percent = 512 / max([w, h])
 
