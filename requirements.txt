@@ -4,6 +4,9 @@ matplotlib
 seaborn
 tensorflow-macos; sys_platform == 'darwin'
 tensorflow; sys_platform != 'darwin'
+sahi
+ultralytics==8.0.4
+ultralyticsplus==0.0.3
 tensorflow_hub
 fairscale
 ftfy
