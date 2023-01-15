@@ -2,10 +2,10 @@ import yolov7
 import numpy as np
 import torch
 import cv2
-from diffusers import StableDiffusionInpaintPipeline
+#from diffusers import StableDiffusionInpaintPipeline
 from PIL import Image
 import os
-from clip_interrogator import Config, Interrogator
+#from clip_interrogator import Config, Interrogator
 
 
 def yolov7_inference(
@@ -15,13 +15,11 @@ def yolov7_inference(
         conf_threshold= 0.25,
         iou_threshold= 0.45,
 ):
-
     model = yolov7.load(model_path, device="cpu", hf_model=True, trace=False)
     model.conf = conf_threshold
     model.iou = iou_threshold
     model.classes = [0]
     results = model([image], size=image_size)
-
     return results
 
 
@@ -37,6 +35,7 @@ def process_image(file_path, output_path):
             pred_big = p
 
     org_image = Image.open(file_path)
+'''
 
     pil_image = Image.fromarray(np.uint8(org_image)).convert('RGB')
     ci = Interrogator(Config(clip_model_name="ViT-L-14/openai"))
@@ -82,3 +81,4 @@ def process_image(file_path, output_path):
 
     result = Image.fromarray(result)
     result.save(output_path)
+    '''
