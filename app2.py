@@ -8,7 +8,6 @@ import itertools
 import seaborn as sns
 from copy import deepcopy
 from clustering import filter_clusters
-from motionnet import get_keypoints, loop_through_people
 from diffusers import StableDiffusionInpaintPipeline
 from PIL import Image
 import os
@@ -92,12 +91,8 @@ def predict_animal_mask(im,
     color_mask = np.zeros(result_image.shape)
     print('colormask', color_mask.shape) # colormask (200, 200, 3)
     palette = itertools.cycle(sns.color_palette())
-    keypoints = get_keypoints(result_image)
-
 
     w, h, c = result_image.shape
-    noses = np.array([(k[0][1]*w, k[0][0]*h, k[0][2], i) for i, k in enumerate(keypoints)])
-    noses = noses[noses[:, 2] > 0.1]
 
     for lbl, cat in zip(np.unique(label_per_pixel), segments_info): #enumerate(palette()):
         if cat['category_id'] == category:
@@ -105,23 +100,14 @@ def predict_animal_mask(im,
             mask = cv2.resize(mask, dsize=(result_image.shape[1], result_image.shape[0]), interpolation=cv2.INTER_LINEAR)
             y, x = np.where(mask != 0)
             nose = None
-            rect = (x.min(), y.min(), x.max(), y.max())
-            for key in keypoints:
-                if point_in_rect(key[0][1] * h, key[0][0] * w, rect):
-                    nose = key
-                    break
 
             if nose is not None:
                 cv2.rectangle(color_mask, (int(np.min(x)), int(np.min(y))), (int(np.max(x)), int(np.max(y))), (255,0,0), 1)
                 color_mask[mask != 0, :] = np.asarray(next(palette))*255 #color
                 result.append((mask, nose, (x.min(), y.min(), x.max(), y.max())))
 
-
     # Show image + mask
     pred_img = np.array(result_image)*0.25 + color_mask*0.75
-
-
-    loop_through_people(pred_img, keypoints)
 
     pred_img = pred_img.astype(np.uint8)
 
