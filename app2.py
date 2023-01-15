@@ -188,7 +188,7 @@ def test_image(image_path, gr_slider_confidence=85):
 
     output = pipe(prompt='in a empty street', image=Image.fromarray(final_image), mask_image=Image.fromarray(mask_image)).images[0]
     result = np.array(output)
-    result[yoff:yoff+height, xoff:xoff+width, :] = resized
+    #result[yoff:yoff+height, xoff:xoff+width, :] = resized
 
     result_temp = cv2.bitwise_xor(result, np.logical_not(mask_image).astype(np.uint8))
     final_result = cv2.bitwise_or(result_temp, final_image)
@@ -200,11 +200,11 @@ def test_image(image_path, gr_slider_confidence=85):
 
 
 test_image('cuerpo1.jpg')
-test_image('example_image_1.jpg')
-test_image('example_image_2.jpeg')
-test_image('example_image_2.jpg')
-test_image('example_image_3.jpg')
-test_image('example_image_3.jpeg')
-test_image('face1.jpg')
+#test_image('example_image_1.jpg')
+#test_image('example_image_2.jpeg')
+#test_image('example_image_2.jpg')
+#test_image('example_image_3.jpg')
+#test_image('example_image_3.jpeg')
+#test_image('face1.jpg')
 
 
