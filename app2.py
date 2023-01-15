@@ -190,7 +190,7 @@ def test_image(image_path, gr_slider_confidence=85):
     result = np.array(output)
     result[yoff:yoff+height, xoff:xoff+width, :] = resized
 
-    result_temp = cv2.bitwise_xor(result, np.logical_not(mask_image))
+    result_temp = cv2.bitwise_xor(result, np.logical_not(mask_image).astype(np.uint8))
     final_result = cv2.bitwise_or(result_temp, final_image)
 
     r_result = Image.fromarray(final_result)
