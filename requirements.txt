@@ -1,17 +1,17 @@
 numpy
 opencv-python-headless
-tensorflow-macos; sys_platform == 'darwin'
-tensorflow; sys_platform != 'darwin'
-tensorflow_hub
 ftfy
 transformers
 diffusers
 accelerate
 timm
-yolov7
+opencv_python
+sahi
+torch
+ultralytics==8.0.4
+ultralyticsplus==0.0.3
 clip-interrogator==0.3.1
 torch; sys_platform == 'darwin'
--e git+https://github.com/pharmapsychotic/BLIP.git@lib#egg=blip
 --extra-index-url https://download.pytorch.org/whl/cu113
 torch==1.12.1+cu113; sys_platform != 'darwin'
 torchvision==0.13.1+cu113; sys_platform != 'darwin'
