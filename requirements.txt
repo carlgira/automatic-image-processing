@@ -1,7 +1,6 @@
 numpy
 opencv-python-headless
 ftfy
--e git+https://github.com/pharmapsychotic/BLIP.git@lib#egg=blip
 transformers==4.25.1
 tensorflow
 tensorflow_hub
@@ -18,3 +17,4 @@ torch; sys_platform == 'darwin'
 --extra-index-url https://download.pytorch.org/whl/cu113
 torch==1.12.1+cu113; sys_platform != 'darwin'
 torchvision==0.13.1+cu113; sys_platform != 'darwin'
+-e git+https://github.com/pharmapsychotic/BLIP.git@lib#egg=blip
