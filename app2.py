@@ -8,12 +8,14 @@ import itertools
 import seaborn as sns
 from copy import deepcopy
 from clustering import filter_clusters
+from motionnet import get_keypoints, loop_through_people
 from diffusers import StableDiffusionInpaintPipeline
 from PIL import Image
 import os
 
 feature_extractor = DetrFeatureExtractor.from_pretrained('facebook/detr-resnet-50-panoptic')
 model = DetrForSegmentation.from_pretrained('facebook/detr-resnet-50-panoptic')
+
 
 auth_token = os.environ['HF_AUTH_TOKEN']
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -91,8 +93,12 @@ def predict_animal_mask(im,
     color_mask = np.zeros(result_image.shape)
     print('colormask', color_mask.shape) # colormask (200, 200, 3)
     palette = itertools.cycle(sns.color_palette())
+    keypoints = get_keypoints(result_image)
+
 
     w, h, c = result_image.shape
+    noses = np.array([(k[0][1]*w, k[0][0]*h, k[0][2], i) for i, k in enumerate(keypoints)])
+    noses = noses[noses[:, 2] > 0.1]
 
     for lbl, cat in zip(np.unique(label_per_pixel), segments_info): #enumerate(palette()):
         if cat['category_id'] == category:
@@ -100,22 +106,31 @@ def predict_animal_mask(im,
             mask = cv2.resize(mask, dsize=(result_image.shape[1], result_image.shape[0]), interpolation=cv2.INTER_LINEAR)
             y, x = np.where(mask != 0)
             nose = None
+            rect = (x.min(), y.min(), x.max(), y.max())
+            for key in keypoints:
+                if point_in_rect(key[0][1] * h, key[0][0] * w, rect):
+                    nose = key
+                    break
 
             if nose is not None:
                 cv2.rectangle(color_mask, (int(np.min(x)), int(np.min(y))), (int(np.max(x)), int(np.max(y))), (255,0,0), 1)
                 color_mask[mask != 0, :] = np.asarray(next(palette))*255 #color
                 result.append((mask, nose, (x.min(), y.min(), x.max(), y.max())))
 
+
     # Show image + mask
     pred_img = np.array(result_image)*0.25 + color_mask*0.75
+
+
+    loop_through_people(pred_img, keypoints)
 
     pred_img = pred_img.astype(np.uint8)
 
     return pred_img, result
 
 
-def test_image(image_path , gr_slider_confidence=45):
-    output_path = 'out_' + image_path
+def test_image(image_path, gr_slider_confidence=85):
+    output_path= 'out_' + image_path
     gr_image_input = cv2.imread(image_path)
     print(gr_image_input.shape)
 
@@ -166,10 +181,10 @@ def test_image(image_path , gr_slider_confidence=45):
     mask_image = np.zeros((512, 512, 3), dtype=np.uint8)
     mask_image[yoff:yoff+height, xoff:xoff+width, :] = resized_mask
 
-    plt.imshow(final_image)
-    plt.show()
-    plt.imshow(mask_image)
-    plt.show()
+    #plt.imshow(final_image)
+    #plt.show()
+    #plt.imshow(mask_image)
+    #plt.show()
 
     output = pipe(prompt='in a empty street', image=Image.fromarray(final_image), mask_image=Image.fromarray(mask_image)).images[0]
     result = np.array(output)
@@ -182,8 +197,14 @@ def test_image(image_path , gr_slider_confidence=45):
     r_result.save(output_path)
 
 
-test_image('example_image_3.jpeg')
+
+
+test_image('cuerpo1.jpg')
+test_image('example_image_1.jpg')
 test_image('example_image_2.jpeg')
-test_image('example_image_1.jpeg')
+test_image('example_image_2.jpg')
+test_image('example_image_3.jpg')
+test_image('example_image_3.jpeg')
 test_image('face1.jpg')
-test_image('face2.jpg')
+
+
