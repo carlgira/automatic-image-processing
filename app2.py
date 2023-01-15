@@ -1,9 +1,7 @@
 from transformers import DetrFeatureExtractor, DetrForSegmentation
-from PIL import Image
 import numpy as np
 import torch
 import cv2
-from matplotlib import pyplot as plt
 import itertools
 import seaborn as sns
 from copy import deepcopy
@@ -12,6 +10,10 @@ from motionnet import get_keypoints, loop_through_people
 from diffusers import StableDiffusionInpaintPipeline
 from PIL import Image
 import os
+import random
+
+
+prompts = ['in a empty street', 'alone in a office', 'alone in a garden', 'alone in a house']
 
 feature_extractor = DetrFeatureExtractor.from_pretrained('facebook/detr-resnet-50-panoptic')
 model = DetrForSegmentation.from_pretrained('facebook/detr-resnet-50-panoptic')
@@ -132,9 +134,11 @@ def predict_animal_mask(im,
 def test_image(image_path, gr_slider_confidence=85):
     output_path= 'out_' + image_path
     gr_image_input = cv2.imread(image_path)
-    print(gr_image_input.shape)
 
     pred_img, result = predict_animal_mask(gr_image_input, gr_slider_confidence)
+
+    if len(result) == 0:
+        return
 
     area = 0
     r_max = None
@@ -152,8 +156,8 @@ def test_image(image_path, gr_slider_confidence=85):
     mask_image = np.zeros(real_image_input.shape, dtype=np.uint8)
     mask_image.fill(255)
     masked_apply = cv2.bitwise_and(mask_image, mask_image, mask=(r_max[0] == 0).astype(np.uint8))
-    masked_apply = np.logical_not(masked_apply).astype(np.uint8)
-    masked_apply[masked_apply != 0] = 255
+    #masked_apply = np.logical_not(masked_apply).astype(np.uint8)
+    #masked_apply[masked_apply != 0] = 255
 
     masked = cv2.bitwise_and(real_image_input, real_image_input, mask=(r_max[0] != 0).astype(np.uint8))
 
@@ -179,34 +183,30 @@ def test_image(image_path, gr_slider_confidence=85):
     final_image = np.zeros((512, 512, 3), dtype=np.uint8)
     final_image[yoff:yoff+height, xoff:xoff+width, :] = resized
     mask_image = np.zeros((512, 512, 3), dtype=np.uint8)
+    mask_image.fill(255)
     mask_image[yoff:yoff+height, xoff:xoff+width, :] = resized_mask
 
-    #plt.imshow(final_image)
-    #plt.show()
-    #plt.imshow(mask_image)
-    #plt.show()
+    output = pipe(prompt=random.choice(prompts), image=Image.fromarray(final_image), mask_image=Image.fromarray(mask_image)).images[0]
+    result = np.array(output)
 
-    output = pipe(prompt='in a empty street', image=Image.fromarray(final_image), mask_image=Image.fromarray(mask_image)).images[0]
     result = np.array(output)
     #result[yoff:yoff+height, xoff:xoff+width, :] = resized
     Image.fromarray(result).save('gen_' + image_path)
 
-
-    result_temp = cv2.bitwise_xor(result, np.logical_not(mask_image).astype(np.uint8))
+    result_temp = cv2.bitwise_and(result, mask_image)
     final_result = cv2.bitwise_or(result_temp, final_image)
 
     r_result = Image.fromarray(final_result)
     r_result.save(output_path)
 
-
-
+    return r_result
 
 test_image('cuerpo1.jpg')
-#test_image('example_image_1.jpg')
-#test_image('example_image_2.jpeg')
-#test_image('example_image_2.jpg')
-#test_image('example_image_3.jpg')
-#test_image('example_image_3.jpeg')
-#test_image('face1.jpg')
+test_image('example_image_1.jpg')
+test_image('example_image_2.jpeg')
+test_image('example_image_2.jpg')
+test_image('example_image_3.jpg')
+test_image('example_image_3.jpeg')
+test_image('face1.jpg')
 
 
