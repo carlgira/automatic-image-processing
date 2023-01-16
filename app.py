@@ -72,6 +72,9 @@ def home():
         return jsonify({'code': 'ok', 'message': 'Training started'})
 
 
+    return jsonify({'code': 'error', 'message': 'Did not receive a POST request'})
+
+
 @flask.route('/status', methods=['GET'])
 def get():
     return jsonify({'status': is_training_running()})
