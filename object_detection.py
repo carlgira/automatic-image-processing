@@ -8,23 +8,50 @@ import os
 #from clip_interrogator import Config, Interrogator
 
 
-def yolov7_inference(
+def yolov8_inference(
         image,
         model_path,
-        image_size= 640,
-        conf_threshold= 0.25,
-        iou_threshold= 0.45,
+        image_size=640,
+        conf_threshold=0.25,
+        iou_threshold=0.45,
 ):
-    model = yolov7.load(model_path, device="cpu", hf_model=True, trace=False)
+    model = YOLO(model_path)
     model.conf = conf_threshold
     model.iou = iou_threshold
     model.classes = [0]
-    results = model([image], size=image_size)
-    return results
+    results = model.predict(image, imgsz=image_size, return_outputs=True)
+    object_prediction_list = []
+    predictions = []
+    for _, image_results in enumerate(results):
+        image_predictions_in_xyxy_format = image_results['det']
+        for pred in image_predictions_in_xyxy_format:
+            x1, y1, x2, y2 = (
+                int(pred[0]),
+                int(pred[1]),
+                int(pred[2]),
+                int(pred[3]),
+            )
+            predictions.append((int(pred[0]),int(pred[1]),int(pred[2]),int(pred[3]), pred[4], pred[5]))
+            bbox = [x1, y1, x2, y2]
+            score = pred[4]
+            category_name = model.model.names[int(pred[5])]
+            category_id = pred[5]
+            object_prediction = ObjectPrediction(
+                bbox=bbox,
+                category_id=int(category_id),
+                score=score,
+                category_name=category_name,
+            )
+            object_prediction_list.append(object_prediction)
+
+    #image = read_image(image)
+    #output_image = visualize_object_predictions(image=image, object_prediction_list=object_prediction_list)
+
+    return predictions
 
 
 def process_image(file_path, output_path):
-    r = yolov7_inference(file_path, 'kadirnar/yolov7-tiny-v0.1')
+    r = yolov8_inference(file_path, 'kadirnar/yolov8m-v8.0')
 
     area = 0
     pred_big = None
@@ -38,10 +65,7 @@ def process_image(file_path, output_path):
 '''
 
     pil_image = Image.fromarray(np.uint8(org_image)).convert('RGB')
-    ci = Interrogator(Config(clip_model_name="ViT-L-14/openai"))
-    ci.config.blip_num_beams = 64
-    ci.config.chunk_size = 2048
-    ci.config.flavor_intermediate_count = 2048
+    
 
     prompt = ci.interrogate(pil_image)
 

@@ -199,14 +199,7 @@ def test_image(image_path, gr_slider_confidence=85):
     r_result = Image.fromarray(final_result)
     r_result.save(output_path)
 
-    return r_result
+    return final_result, r_result
 
-test_image('cuerpo1.jpg')
-test_image('example_image_1.jpg')
-test_image('example_image_2.jpeg')
-test_image('example_image_2.jpg')
-test_image('example_image_3.jpg')
-test_image('example_image_3.jpeg')
-test_image('face1.jpg')
 
 

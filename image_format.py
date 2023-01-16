@@ -11,7 +11,7 @@ import motionnet
 from diffusers import StableDiffusionInpaintPipeline
 from PIL import Image
 import os
-from clip_interrogator import Config, Interrogator
+#from clip_interrogator import Config, Interrogator
 
 
 parts = ['body', 'half', 'face']
@@ -113,11 +113,13 @@ def predict_animal_mask(im,
     # Show image + mask
     pred_img = np.array(result_image)*0.25 + color_mask*0.75
 
+
     motionnet.loop_through_people(pred_img, keypoints)
 
     pred_img = pred_img.astype(np.uint8)
 
     return pred_img, result
+
 
 
 def possible_parts(image, detection):
@@ -201,14 +203,14 @@ def process_image(filename, output_filename=None):
             area_max = area
             detection_max = part
 
-    result = possible_parts(image, detection_max)
+    mask, nose, rect = detection_max
+    plt.imshow(mask)
+    plt.show()
 
-    #cv2.rectangle(image, (part[1][0], part[1][1]), (part[1][2], part[1][3]), colors[i], 2)
-    part = result[2]
-    x1, y1, x2, y2 = part[1]
+    x1, y1, x2, y2 = rect
     w = abs(x2 - x1)
     h = abs(y2 - y1)
-    sub = org_image[y2:y1, x1:x2]
+    sub = org_image[y1:y2, x1:x2]
     scale_percent = 512 / max([w, h])
 
     width = int(sub.shape[1] * scale_percent)
@@ -227,6 +229,11 @@ def process_image(filename, output_filename=None):
     mask_image.fill(255)
     mask_image[yoff:yoff+height, xoff:xoff+width, :] = 0
 
+    if output_filename is not None:
+        rr = Image.fromarray(final_image)
+        rr.save(output_filename)
+
+    '''
     pil_image = Image.fromarray(np.uint8(org_image)).convert('RGB')
     ci = Interrogator(Config(clip_model_name="ViT-L-14/openai"))
     ci.config.blip_num_beams = 64
@@ -237,6 +244,7 @@ def process_image(filename, output_filename=None):
 
     # python load auth_token from environment variable
     # os.environ
+    
     auth_token = os.environ['HF_AUTH_TOKEN']
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -255,8 +263,9 @@ def process_image(filename, output_filename=None):
     if output_filename is not None:
         result = Image.fromarray(result)
         result.save(output_filename)
+    '''
 
-    return result
+    return rr
 
 
 def test_image(image_path, gr_slider_confidence):
@@ -264,10 +273,32 @@ def test_image(image_path, gr_slider_confidence):
     print(gr_image_input.shape)
 
     pred_img, result = predict_animal_mask(gr_image_input, gr_slider_confidence)
-    plt.imshow(pred_img)
+
+
+    detection_max = None
+    area_max = 0
+    for part in result:
+        mask, keypoints, rect = part
+        x_min, y_min, x_max, y_max = rect
+        area = (x_max - x_min) * (y_max - y_min)
+        if area > area_max:
+            area_max = area
+            detection_max = part
+
+    mask, nose, rect = detection_max
+    plt.imshow(mask)
     plt.show()
 
 
 
-#test_image('example_image_2.jpeg', 85)
+
+test_image('example_image_3.jpg', 40)
 #test_image('cuerpo1.jpg', 85)
+
+#image_format.process_image('example_image_1.jpg', 'o_2.png')
+#image_format.process_image('example_image_2.jpg', 'o_3.png')
+#image_format.process_image('example_image_3.jpg', 'o_4.png')
+#image_format.process_image('example_image_2.jpeg', 'o_5.png')
+#image_format.process_image('face1.jpg', 'o_6.png')
+#image_format.process_image('face2.jpg', 'o_7.png')
+#image_format.process_image('example_image_3.jpg', 'o_4.png')
