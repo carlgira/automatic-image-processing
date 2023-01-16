@@ -21,6 +21,8 @@ def home():
             class_dir = 'person_ddim'
             training_steps = 1600
             seed = random.randint(7, 1000000)
+            test = request.form['test']
+            print('test', test)
 
             if 'images' not in request.files:
                 return
