@@ -109,7 +109,6 @@ def get_keypoints(frame):
     h, w, _ = frame.shape
     h, w = (int(256 * w / h), 256) if h > w else (256, int(256 * w / h))
     h, w = h - h % 32, w - w % 32
-    print(h, w)
     img = frame.copy()
     img = tf.image.resize_with_pad(tf.expand_dims(img, axis=0), h, w)
     input_img = tf.cast(img, dtype=tf.int32)
