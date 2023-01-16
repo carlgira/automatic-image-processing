@@ -137,8 +137,8 @@ def test_image(image_path, gr_slider_confidence=85):
     pred_img, result = None, None
     try:
         pred_img, result = predict_animal_mask(gr_image_input, gr_slider_confidence)
-    except:
-        print('Error in detecting')
+    except Exception as e:
+        print('Error in detecting', e)
         return None, None
 
     if len(result) == 0:
