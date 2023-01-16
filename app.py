@@ -75,7 +75,7 @@ def submit():
             subprocess.getoutput("zip -j {ZIP_FILE} {ZIP_FILES}".format(ZIP_FILE=zip_file , ZIP_FILES=zip_files))
 
             fileobj = open('test.zip', 'rb')
-            payload = {'subject': training_subject, 'subject_type': subject_type, 'instance_name': instance_name, 'class_dir': class_dir, 'training_steps': training_steps, 'seed': seed}
+            payload = {'training_subject': training_subject, 'subject_type': subject_type, 'instance_name': instance_name, 'class_dir': class_dir, 'training_steps': training_steps, 'seed': seed}
             r = requests.post('http://localhost:3000/', data=payload, files={"images": (zip_file, fileobj)})
 
             if r.status_code != 200:
