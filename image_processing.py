@@ -131,6 +131,20 @@ def predict_animal_mask(im,
     return pred_img, result
 
 
+def default_image_response(gr_image_input, output_path):
+    real_image_input = cv2.cvtColor(gr_image_input, cv2.COLOR_BGR2RGB)
+    h, w, _ = real_image_input.shape
+    scale_percent = 512 / max([w, h])
+    width = int(w * scale_percent)
+    height = int(h * scale_percent)
+    dim = (width, height)
+    resized = cv2.resize(real_image_input, dim, interpolation=cv2.INTER_AREA)
+    sub = resized[:512, :512, :]
+    r_result = Image.fromarray(sub)
+    r_result.save(output_path)
+    return sub, r_result
+
+
 def test_image(image_path, output_path, gr_slider_confidence=85):
     gr_image_input = cv2.imread(image_path)
     print(image_path)
@@ -141,11 +155,11 @@ def test_image(image_path, output_path, gr_slider_confidence=85):
     except Exception as e:
         print('Error in detecting', e)
         traceback.print_exc()
-        return None, None
+        return default_image_response(gr_image_input, output_path)
 
     if len(result) == 0:
         print('No person detected')
-        return None, None
+        return default_image_response(gr_image_input, output_path)
 
     area = 0
     r_max = None

@@ -3,15 +3,21 @@ import subprocess
 from werkzeug.utils import secure_filename
 import random
 import image_processing
+import requests
 import os
+import sched, time
 
 flask = Flask(__name__)
 
 UPLOAD_FOLDER = '/home/ubuntu/automatic-image-processing/uploads'
 PROCESSED_FOLDER = '/home/ubuntu/automatic-image-processing/processed'
 
+task_training = None
+gender = None
+instance_name = None
 @flask.route('/submit', methods=['POST'])
 def submit():
+    global gender, instance_name
     if request.method == 'POST':
 
         if not is_training_running():
@@ -19,10 +25,9 @@ def submit():
             subject_type = 'person'
             instance_name = ''.join(random.choice('abcdefghijklmnopqrtsvwyz') for i in range(10))
             class_dir = 'person_ddim'
-            training_steps = 1600
+            training_steps = 100
             seed = random.randint(7, 1000000)
-            test = request.form['test']
-            print('test', test)
+            gender = request.form['gender']
 
             if 'images' not in request.files:
                 return jsonify(message='No file uploaded', category="error", status=500)
@@ -69,6 +74,18 @@ def submit():
             zip_files = PROCESSED_FOLDER + '/' + instance_name + '/*'
             subprocess.getoutput("zip -j {ZIP_FILE} {ZIP_FILES}".format(ZIP_FILE=zip_file , ZIP_FILES=zip_files))
 
+            fileobj = open('test.zip', 'rb')
+            payload = {'subject': training_subject, 'subject_type': subject_type, 'instance_name': instance_name, 'class_dir': class_dir, 'training_steps': training_steps, 'seed': seed}
+            r = requests.post('http://localhost:3000/', data=payload, files={"images": (zip_file, fileobj)})
+
+            if r.status_code != 200:
+                return jsonify(message=r.text, category="error", status=500)
+
+            task_training = sched.scheduler(time.time, time.sleep)
+            task_training.enter(300, 1, check_if_training, (task_training,))
+            task_training.run()
+
+
         return jsonify(message='Training started', category="success", status=200)
 
     return jsonify(message='Did not receive a POST request', category="error", status=500)
@@ -82,6 +99,24 @@ def get():
 def is_training_running():
     output = subprocess.getoutput("ps -ef | grep accelerate | grep -v grep")
     return len(output) > 0
+
+
+def check_if_training(runnable_task):
+    if is_training_running():
+        runnable_task.enter(300, 1, check_if_training, (runnable_task,))
+    else:
+        runnable_task.enter(900, 1, sd_ready, (runnable_task,))
+
+
+def sd_ready(runnable_task):
+    global gender, instance_name
+    file_prompt = 'sd-' + gender + '-prompts.json'
+    new_file_prompt = PROCESSED_FOLDER + '/' + instance_name + '/prompts.json'
+    subprocess.getoutput("cp " + file_prompt + " " + new_file_prompt)
+    subprocess.getoutput('sed -i "s/<subject>/' + instance_name + '/g" ' + new_file_prompt)
+    fileobj = open(new_file_prompt, 'rb')
+
+    r = requests.post('http://localhost:3000/txt2img', files={"prompts": ('prompts.json', fileobj)})
 
 
 if __name__ == '__main__':
