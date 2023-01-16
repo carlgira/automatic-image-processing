@@ -18,3 +18,4 @@ torch; sys_platform == 'darwin'
 torch==1.12.1+cu113; sys_platform != 'darwin'
 torchvision==0.13.1+cu113; sys_platform != 'darwin'
 jupyterlab
+Flask==2.2.2
