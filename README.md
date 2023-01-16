@@ -21,7 +21,7 @@ export HF_AUTH_TOKEN='<hf_token>'
 jupyterlab
 ```
 
-- Open `notebook.ipynb`.
+- Open `notebook.ipynb` http://localhost:8888 (make sure to open the ssh tunnel)
 - Upload images
 - Change the `notebook.ipynb` code with the name of the image
 - Run the code
