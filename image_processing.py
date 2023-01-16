@@ -63,7 +63,7 @@ def get_clusters(l):
 def predict_animal_mask(im,
                         gr_slider_confidence):
     image = Image.fromarray(im) # im: numpy array 3d: 480, 640, 3: to PIL Image
-    image = image.resize((200,200)) #  PIL image # could I upsample output instead? better?
+    image = image.resize((200,200))
     #result_image = np.array(image.convert('RGB'))
     result_image = im
 
@@ -135,10 +135,15 @@ def test_image(image_path, gr_slider_confidence=85):
     output_path= 'out_' + image_path
     gr_image_input = cv2.imread(image_path)
 
-    pred_img, result = predict_animal_mask(gr_image_input, gr_slider_confidence)
+    pred_img, result = None, None
+    try:
+        pred_img, result = predict_animal_mask(gr_image_input, gr_slider_confidence)
+    except:
+        print('error')
+        return None, None
 
     if len(result) == 0:
-        return
+        return None, None
 
     area = 0
     r_max = None
@@ -149,20 +154,13 @@ def test_image(image_path, gr_slider_confidence=85):
             area = a
             r_max = r
 
-    mask = r_max[0]
-
     real_image_input = cv2.cvtColor(gr_image_input, cv2.COLOR_BGR2RGB)
 
     mask_image = np.zeros(real_image_input.shape, dtype=np.uint8)
     mask_image.fill(255)
     masked_apply = cv2.bitwise_and(mask_image, mask_image, mask=(r_max[0] == 0).astype(np.uint8))
-    #masked_apply = np.logical_not(masked_apply).astype(np.uint8)
-    #masked_apply[masked_apply != 0] = 255
 
     masked = cv2.bitwise_and(real_image_input, real_image_input, mask=(r_max[0] != 0).astype(np.uint8))
-
-
-
 
     x1, y1, x2, y2 = r_max[2]
     w = abs(x2 - x1)
@@ -189,8 +187,6 @@ def test_image(image_path, gr_slider_confidence=85):
     output = pipe(prompt=random.choice(prompts), image=Image.fromarray(final_image), mask_image=Image.fromarray(mask_image)).images[0]
     result = np.array(output)
 
-    result = np.array(output)
-    #result[yoff:yoff+height, xoff:xoff+width, :] = resized
     Image.fromarray(result).save('gen_' + image_path)
 
     result_temp = cv2.bitwise_and(result, mask_image)
@@ -200,6 +196,3 @@ def test_image(image_path, gr_slider_confidence=85):
     r_result.save(output_path)
 
     return final_result, r_result
-
-
-
