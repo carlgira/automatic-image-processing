@@ -15,8 +15,8 @@ import random
 
 prompts = ['in a empty street', 'alone in a office', 'alone in a garden', 'alone in a house']
 
-feature_extractor = DetrFeatureExtractor.from_pretrained('facebook/detr-resnet-50-panoptic')
-model = DetrForSegmentation.from_pretrained('facebook/detr-resnet-50-panoptic')
+feature_extractor = DetrFeatureExtractor.from_pretrained('facebook/detr-resnet-101-panoptic')
+model = DetrForSegmentation.from_pretrained('facebook/detr-resnet-101-panoptic')
 
 
 auth_token = os.environ['HF_AUTH_TOKEN']
@@ -134,7 +134,7 @@ def predict_animal_mask(im,
 def test_image(image_path, gr_slider_confidence=85):
     output_path= 'out_' + image_path
     gr_image_input = cv2.imread(image_path)
-
+    
     pred_img, result = predict_animal_mask(gr_image_input, gr_slider_confidence)
 
     if len(result) == 0:
