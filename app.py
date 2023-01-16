@@ -28,13 +28,13 @@ def home():
                 return
             file = request.files['images']
             if file.filename == '':
-                return jsonify({'code': 'error', 'message': 'No file uploaded'})
+                return jsonify(message='No file uploaded', category="error", status=500)
 
             filename = secure_filename(file.filename)
             try:
                 file.save(os.path.join(UPLOAD_FOLDER, filename))
             except:
-                return jsonify({'code': 'error', 'message': 'The zip file could not be saved'})
+                return jsonify(message='The zip file could not be saved', category="error", status=500)
 
             try:
                 subprocess.run(["unzip", "-j" , UPLOAD_FOLDER + '/' + filename, '-d' , UPLOAD_FOLDER + '/' + instance_name], check=True)
@@ -51,10 +51,10 @@ def home():
                         continue
 
                     if not file.lower().endswith(('.png', '.jpg', '.jpeg')):
-                        return jsonify({'code': 'error', 'message': 'Zip contains other files than, png, jpg or jpeg'})
+                        return jsonify(message='Zip contains other files than, png, jpg or jpeg', category="error", status=500)
 
             except Exception as e:
-                return jsonify({'code': 'error', 'message': 'An error occurred processing the zip file'})
+                return jsonify(message='An error occurred processing the zip file', category="error", status=500)
 
             subprocess.run(["rm", "-rf", UPLOAD_FOLDER + '/' + filename])
 
@@ -69,10 +69,9 @@ def home():
             zip_files = PROCESSED_FOLDER + '/' + instance_name + '/*'
             subprocess.getoutput("zip -j {ZIP_FILE} {ZIP_FILES}".format(ZIP_FILE=zip_file , ZIP_FILES=zip_files))
 
-        return jsonify({'code': 'ok', 'message': 'Training started'})
+        return jsonify(message='Training started', category="success", status=200)
 
-
-    return jsonify({'code': 'error', 'message': 'Did not receive a POST request'})
+    return jsonify(message='Did not receive a POST request', category="error", status=500)
 
 
 @flask.route('/status', methods=['GET'])
