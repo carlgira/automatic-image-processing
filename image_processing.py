@@ -15,8 +15,8 @@ import random
 
 prompts = ['in a empty street', 'alone in a office', 'alone in a garden', 'alone in a house']
 
-feature_extractor = DetrFeatureExtractor.from_pretrained('facebook/detr-resnet-50-panoptic')
-model = DetrForSegmentation.from_pretrained('facebook/detr-resnet-50-panoptic')
+feature_extractor = DetrFeatureExtractor.from_pretrained('facebook/detr-resnet-101-panoptic')
+model = DetrForSegmentation.from_pretrained('facebook/detr-resnet-101-panoptic')
 
 
 auth_token = os.environ['HF_AUTH_TOKEN']
