@@ -58,7 +58,7 @@ def submit():
 
             subprocess.run(["rm", "-rf", UPLOAD_FOLDER + '/' + filename])
 
-            subprocess.getoutput("mkdir -p " + UPLOAD_FOLDER + '/' + instance_name)
+            subprocess.getoutput("mkdir -p " + PROCESSED_FOLDER + '/' + instance_name)
 
             for i, file in enumerate(os.listdir(UPLOAD_FOLDER + '/' + instance_name)):
                 file_path = UPLOAD_FOLDER + '/' + instance_name + '/' + file
