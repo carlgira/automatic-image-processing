@@ -3,6 +3,7 @@ Several tools to format images to 512 x 512 for dreambooth training
 
 ## Preparation  
 ```
+sudo apt install rustc cargo -y
 git clone https://github.com/carlgira/automatic-image-processing.git
 ```
 
