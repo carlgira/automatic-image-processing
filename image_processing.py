@@ -93,7 +93,6 @@ def predict_animal_mask(im,
     category = 1 # 1 is the category id for the "person" class
     #color_mask = np.zeros(image.size+(3,))
     color_mask = np.zeros(result_image.shape)
-    print('colormask', color_mask.shape) # colormask (200, 200, 3)
     palette = itertools.cycle(sns.color_palette())
     keypoints = get_keypoints(result_image)
 
@@ -139,7 +138,6 @@ def test_image(image_path, gr_slider_confidence=85):
     try:
         pred_img, result = predict_animal_mask(gr_image_input, gr_slider_confidence)
     except:
-        print('error')
         return None, None
 
     if len(result) == 0:
