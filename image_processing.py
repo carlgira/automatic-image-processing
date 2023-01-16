@@ -133,6 +133,7 @@ def predict_animal_mask(im,
 def test_image(image_path, gr_slider_confidence=85):
     output_path= 'out_' + image_path
     gr_image_input = cv2.imread(image_path)
+    print(image_path)
     
     pred_img, result = None, None
     try:
