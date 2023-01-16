@@ -11,7 +11,7 @@ UPLOAD_FOLDER = '/home/ubuntu/automatic-image-processing/uploads'
 PROCESSED_FOLDER = '/home/ubuntu/automatic-image-processing/processed'
 
 @flask.route('/submit', methods=['POST'])
-def home():
+def submit():
     if request.method == 'POST':
 
         if not is_training_running():
@@ -25,7 +25,7 @@ def home():
             print('test', test)
 
             if 'images' not in request.files:
-                return
+                return jsonify(message='No file uploaded', category="error", status=500)
             file = request.files['images']
             if file.filename == '':
                 return jsonify(message='No file uploaded', category="error", status=500)
