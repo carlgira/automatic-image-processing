@@ -19,7 +19,7 @@ pip install -r requirements.txt
 ## Test
 ```
 export HF_AUTH_TOKEN='<hf_token>'
-jupyterlab
+jupyter-lab
 ```
 
 - Open `notebook.ipynb` http://localhost:8888 (make sure to open the ssh tunnel)
