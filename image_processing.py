@@ -10,6 +10,7 @@ from motionnet import get_keypoints, loop_through_people
 from diffusers import StableDiffusionInpaintPipeline
 from PIL import Image
 import os
+import traceback
 import random
 
 
@@ -140,6 +141,7 @@ def test_image(image_path, gr_slider_confidence=85):
         pred_img, result = predict_animal_mask(gr_image_input, gr_slider_confidence)
     except Exception as e:
         print('Error in detecting', e)
+        traceback.print_exc()
         return None, None
 
     if len(result) == 0:
