@@ -138,9 +138,11 @@ def test_image(image_path, gr_slider_confidence=85):
     try:
         pred_img, result = predict_animal_mask(gr_image_input, gr_slider_confidence)
     except:
+        print('Error in detecting')
         return None, None
 
     if len(result) == 0:
+        print('No person detected')
         return None, None
 
     area = 0
