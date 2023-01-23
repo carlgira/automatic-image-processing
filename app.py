@@ -66,4 +66,4 @@ def submit():
 
 
 if __name__ == '__main__':
-    flask.run(debug=True, port=4000)
+    flask.run(host='0.0.0.0', port=4000)
