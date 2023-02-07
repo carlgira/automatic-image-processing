@@ -28,7 +28,7 @@ def submit():
             return jsonify(message='The zip file could not be saved', category="error", status=500)
 
         try:
-            subprocess.run(["unzip", "-j", UPLOAD_FOLDER + '/' + filename, '-d' , UPLOAD_FOLDER + '/' + instance_name], check=True)
+            subprocess.run(["unzip", "-jf", UPLOAD_FOLDER + '/' + filename, '-d' , UPLOAD_FOLDER + '/' + instance_name], check=True)
 
             for i, file in enumerate(os.listdir(UPLOAD_FOLDER + '/' + instance_name)):
                 file_path = UPLOAD_FOLDER + '/' + instance_name + '/' + file
